@@ -87,12 +87,20 @@ function return_json($obj, $status = 200) {
  * @return mixed
  */
 function get_vars() {
-    
     $ci =& get_instance();
     
     $post = $ci->input->post();
     $get = $ci->input->get();
-    $phpinput = (Array)json_decode(file_get_contents('php://input'));
+    $req_type = get_request_type();
+    
+    // Different data handling for if there is a PUT request
+    if($req_type == 'put' || $req_type  == 'delete') {
+        
+        parse_str(urldecode(file_get_contents('php://input')), $phpinput);
+                
+    } else {
+        $phpinput = (Array)json_decode(file_get_contents('php://input'));
+    }
     
     if(is_null($post) || !$post) {
         $post = array();

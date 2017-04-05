@@ -1,8 +1,12 @@
-$(document).ready(function () {
+if(typeof $ === 'undefined') {
+    $ = {};
     
+}
+
+$(document).ready(function () {
     // Initialize the Bootstrap Tooltip API
     $(function () {
-        $('[data-toggle="tooltip"]').tooltip()
+        $('[data-toggle="tooltip"]').tooltip();
     });
     
     // Actions to perform on edit click
@@ -10,6 +14,7 @@ $(document).ready(function () {
         
        var id = $(this).data('id'),
            container = $(this).parent().parent();
+           $(container).parent().parent().wrap('<form id="editForm"></div>');
           
            
         $(container).find('.edit').hide();
@@ -19,6 +24,8 @@ $(document).ready(function () {
         current = createInputs(container);
         
         $(container).find('input').first().focus();
+        
+        return false;
                 
     });
     
@@ -28,7 +35,7 @@ $(document).ready(function () {
             container = $(this).parent().parent();
         
         var r = confirm("Are you sure you want to cancel your edit? Changes will not be saved.");
-        if (r == true) {
+        if (r === true) {
             cancelEdit(container);
         } else {
             return false;
@@ -39,11 +46,96 @@ $(document).ready(function () {
     $('.save').on('click', function () {
         
         var id = $(this).data('id'),
-           container = $(this).parent().parent();
+            container = $(this).parent().parent();
         
-        $(container).find('.edit').show();
-        $(container).find('.save').hide();
-        $(container).find('.cancel').hide();
+        $('#editForm').validate({
+            submitHandler: function (form) {
+                // Disable the submit input to prevent double-submits and show
+                // loader
+                $('.save, .cancel').attr('disabled', 'disabled');
+                $('.loading').css('visibility', 'visible');
+                
+                $.ajax({
+                    url: '/index.php/people/',
+                    data: {
+                        id: id,
+                        first_name: $('#first_name').val(),
+                        last_name: $('#last_name').val(),
+                        mobile: $('#mobile').val(),
+                        email: $('#email').val(),
+                        language_id: $('#language_id').val(),
+                        dob: $('#dob').val()
+                    },
+                    dataType: 'json',
+                    type: 'put',
+                    success: function (response) {
+                        // Buttons can be interacted with again and loader 
+                        // is hidden
+                        $('.save, .cancel').removeAttr('disabled');
+                        $('.loading').css('visibility', 'hidden');
+
+                        // Execute the "cancel" action, but with new data
+                        cancelEdit(container, response.data);
+                        
+                        // Remove the form element from the table to prevent
+                        // conflicts
+                        $(container).parent().parent().unwrap();
+                        
+                        // Flash the row green to show it has been successfully 
+                        // updated
+                        $(container).addClass('success');
+                        setTimeout(function () {
+                            $(container).removeClass('success');
+                        }, 1500);
+                        
+                    },
+                    error: function () {
+                        // TODO: Create error state
+                    }
+                })                
+            }
+        })        
+    });
+    
+    $('.delete').on('click', function () {
+        var id = $(this).data('id'),
+            container = $(this).parent().parent();
+            
+        // Highlight the affected row
+        $(container).addClass('danger').delay(50);
+            
+        var r = confirm("Are you sure you want to delete this user?");
+        if (r === true) {
+            $('.delete').attr('disabled', 'disabled');
+            $('.loading').css('visibility', 'visible');
+
+            $.ajax({
+                url: '/index.php/people/',
+                data: {
+                    id: id,
+                    deleted: 1
+                },
+                dataType: 'json',
+                type: 'delete',
+                success: function (response) {
+                    // Buttons can be interacted with again and loader 
+                    // is hidden
+                    $('.delete').removeAttr('disabled');
+                    $('.loading').css('visibility', 'hidden');
+                    
+                    $(container).fadeOut(function () {
+                       $(this).remove(); 
+                    });
+
+                },
+                error: function () {
+                    // TODO: Create error state
+                }
+            })   
+        } else {
+            $(container).removeClass('danger');
+            return false;
+        }
     })
     
 });
@@ -56,20 +148,28 @@ $(document).ready(function () {
  * @param object container
  * @returns void
  */
-function cancelEdit(container) {
-    
-    $(container).find('input').each(function (index, value) {
+function cancelEdit(container, data) {
+    // If no data is passed in, use the original values
+    // otherwise replace existing data with new data
+    if(typeof data == 'undefined') {
+        $(container).find('input').each(function (index, value) {
         
-        var val = $(value).data('current');
-        
-        $(value).parent().html(val);
-        
-    });
+            var val = $(value).data('current');
+
+            $(value).parent().html(val);
+
+        });
+    } else {
+        $(container).find('input').each(function (index, value) {
+            var val = data[$(value).attr('id')];
+            
+            $(value).parent().html(val);
+        })
+    }
     
     $(container).find('.edit').show();
     $(container).find('.save').hide();
     $(container).find('.cancel').hide();
-    
 }
 
 function createInputs(container) {
@@ -98,9 +198,9 @@ function generateNumberField(target) {
         size = '',
         value = $(target).html(),
         // Converts the number to a human friendly view
-        mobile = '0' + $(target).html().substring(2);
+        mobile = '0' + $(target).html().substring($(target).html().length - 9);
                 
-    fieldHtml = '<input type="number" data-current="' + value + '" class="form-control" name="' + id + '" id="' + id + '" value="' + mobile + '" size="10" />';
+    fieldHtml = '<input type="number" data-current="' + value + '" class="form-control" name="' + id + '" id="' + id + '" value="' + mobile + '" size="10" required />';
     
     $(target).html(fieldHtml);
             
@@ -110,8 +210,7 @@ function generateEmailField(target) {
     
     var id = $(target).data('field'),
         value = $(target).html(),
-        fieldHtml = '<input type="email" data-current="' + value + '" class="form-control" name="' + id + '" id="' + id + '" value="' + $(target).html() + '" size="10" />';
-    
+        fieldHtml = '<input type="email" data-current="' + value + '" class="form-control" name="' + id + '" id="' + id + '" value="' + $(target).html() + '" size="10" required />';    
     $(target).html(fieldHtml);
 }
 
@@ -127,7 +226,7 @@ function generateTextField(target) {
         size = ' size="6"';
     }
         
-    fieldHtml = '<input type="text" data-current="' + value + '" class="form-control" name="' + id + '" id="' + id + '" value="' + $(target).html() + '"' + size + ' />';
+    fieldHtml = '<input type="text" data-current="' + value + '" class="form-control" name="' + id + '" id="' + id + '" value="' + $(target).html() + '"' + size + ' required   />';
     
     $(target).html(fieldHtml);
     

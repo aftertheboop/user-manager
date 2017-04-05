@@ -13,6 +13,7 @@ class People extends CI_Controller {
         parent::__construct();
         
         // Load in general use libraries, models and helpers
+        $this->load->model('people_model');
         $this->load->helper('restful');
         
     }
@@ -26,37 +27,59 @@ class People extends CI_Controller {
         
         switch($req_type) {
             case 'get':
-                $this->get($page);
+                $this->_get($page);
                 break;
             case 'put':
+                $this->_put();
                 break;
             case 'post':
                 break;
             case 'delete':
+                $this->_put();
                 break;
         }
     }
     
-    private function get($page = null) {
-        
-        // Load models and libraries
-        $this->load->model('people_model');
+    private function _get($page = null) {
         
         $vars = get_vars();
-        
         // If the incoming request has an ID
         if(isset($vars->id)) {
-        // Get a single person based on their ID
+            // Get a single person based on their ID
         } else {
-        // Get a page of people
+            // Get a page of people
             $people = $this->people_model->get_people($page);
             
             $this->load->view('common/template', array('_views' => 'people/index.php',
                                                        'people' => $people));
             
         }
+    }
+    
+    private function _put() {
+        // Load a mobile helper to assist with converting the mobile number
+        $this->load->helper('mobile');
+                
+        $vars = get_vars();
         
-        
+        if(isset($vars->id)) {
+            // Set the variables detailing the modification
+            $vars->modified_by = USER_ID;
+            $vars->date_modified = date('Y-m-d H:i:s');
+            
+            // Process the mobile number to be DB friendly
+            if(isset($vars->mobile)) {
+                $vars->mobile = human_to_db($vars->mobile);
+            }
+            
+            // Update user
+            $person = $this->people_model->upsert($vars->id, $vars);
+            
+            return_json(array('message' => 'Person has been updated', 'data' => $person), 200);
+            
+        } else {
+            // Fail. No ID set to update
+        }
         
     }
     

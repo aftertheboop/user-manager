@@ -25,9 +25,10 @@ class People_model extends CI_Model {
         $limit = 10;
         $offset = ($page - 1) * $limit;
         
-        $result = $this->db->select('people.id AS id, first_name, last_name, mobile, email, languages.name AS language, dob, date_modified, modified_by, people.date_created AS date_created')
+        $result = $this->db->select('people.id AS id, first_name, last_name, mobile, email, language_id, languages.name AS language, dob, date_modified, modified_by, people.date_created AS date_created')
                            ->limit($limit, $offset)
-                           ->join('languages', 'people.language_id = languages.id')
+                           ->join('languages', 'people.language_id = languages.id', 'left')
+                           ->where('deleted', 0)
                            ->get('people');
         
         if($result->num_rows() > 0) {
@@ -37,5 +38,68 @@ class People_model extends CI_Model {
         }
         
     }
+    
+    /**
+     * Get Person
+     * 
+     * Gets a specific person by ID
+     * @param int $id
+     * @return object
+     */
+    public function get_person($id) {
+        
+        $result = $this->db->where('id', $id)
+                           ->where('deleted', 0)
+                           ->limit(1)
+                           ->get('people');
+        
+        if($result->num_rows() > 0) {
+            return $result->row();
+        } else {
+            return false;
+        }
+        
+    }
+    
+    /**
+     * Upsert
+     * 
+     * Checks to see if the Person ID exists. If so, update, otherwise create
+     * a new user.
+     * @param int $id
+     * @param object $data
+     * @return object
+     */
+    public function upsert($id, $data) {
+        
+        if($this->get_person($id)) {
+            
+            return $this->update_person($id, $data);
+            
+        } else {
+            // Create a new person
+        }
+        
+    }
+    
+    /**
+     * Update Person
+     * 
+     * Updates a person's details by ID
+     * @param int $id
+     * @param object $data
+     * @return object
+     */
+    private function update_person($id, $data) {
+        
+        $this->db->where('id', $id)
+                 ->limit(1)
+                 ->update('people', $data);
+        
+        return $this->get_person($id);
+        
+    }
+    
+    
     
 }
