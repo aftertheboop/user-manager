@@ -3,7 +3,7 @@
     <td class="editable text" data-field="last_name"><?php echo $data->last_name ?></td>
     <td class="editable number" data-field="mobile"><?php echo $data->mobile ?></td>
     <td class="editable email" data-field="email"><?php echo $data->email ?></td>
-    <td class="editable select text" data-field="language_id"><?php echo $data->language_id ?></td>
+    <td class="editable select" data-field="language_id"><?php echo $data->language_id ?></td>
     <td class="editable text date" data-field="dob"><?php echo $data->dob ?></td>
     <td>
         <button class="edit btn btn-primary" data-id="<?php echo $data->id ?>" data-toggle="tooltip" data-placement="top" title="Edit Person"><span class="glyphicon glyphicon-pencil"></span></button>

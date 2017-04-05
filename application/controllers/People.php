@@ -42,6 +42,8 @@ class People extends CI_Controller {
     
     private function _get($page = null) {
         
+        $this->load->model('languages_model');
+        
         $vars = get_vars();
         // If the incoming request has an ID
         if(isset($vars->id)) {
@@ -49,9 +51,11 @@ class People extends CI_Controller {
         } else {
             // Get a page of people
             $people = $this->people_model->get_people($page);
+            $languages = $this->languages_model->get_languages();
             
             $this->load->view('common/template', array('_views' => 'people/index.php',
-                                                       'people' => $people));
+                                                       'people' => $people,
+                                                       'languages' => $languages));
             
         }
     }

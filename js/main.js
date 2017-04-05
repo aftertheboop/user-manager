@@ -59,12 +59,12 @@ $(document).ready(function () {
                     url: '/index.php/people/',
                     data: {
                         id: id,
-                        first_name: $('#first_name').val(),
-                        last_name: $('#last_name').val(),
-                        mobile: $('#mobile').val(),
-                        email: $('#email').val(),
-                        language_id: $('#language_id').val(),
-                        dob: $('#dob').val()
+                        first_name: $('#editForm #first_name').val(),
+                        last_name: $('#editForm #last_name').val(),
+                        mobile: $('#editForm #mobile').val(),
+                        email: $('#editForm #email').val(),
+                        language_id: $('#editForm #language_id').val(),
+                        dob: $('#editForm #dob').val()
                     },
                     dataType: 'json',
                     type: 'put',
@@ -136,6 +136,12 @@ $(document).ready(function () {
             $(container).removeClass('danger');
             return false;
         }
+    });
+    
+    $('.close-modal').on('click', function () {
+        // When the modal is closed, reset the form
+        $('#addPerson input, #addPerson select').val('');
+        $('#addPerson').reset();
     })
     
 });
@@ -164,7 +170,7 @@ function cancelEdit(container, data) {
             var val = data[$(value).attr('id')];
             
             $(value).parent().html(val);
-        })
+        });
     }
     
     $(container).find('.edit').show();
@@ -187,7 +193,20 @@ function createInputs(container) {
         if($(value).hasClass('email')) {
             generateEmailField(value);
         }
+        
+        if($(value).hasClass('select')) {
+            generateSelectField(value);
+        }
     });
+    
+}
+
+function generateSelectField(target) {
+    
+    var id = $(target).data('field'),
+        value = $(target).html();
+    
+    
     
 }
 

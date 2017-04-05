@@ -16,3 +16,7 @@ tr {
 .loading {
     visibility: hidden;
 }
+
+#addPerson {
+    margin-bottom: 10px;
+}
