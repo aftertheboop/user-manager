@@ -4,6 +4,7 @@ if(typeof $ === 'undefined') {
 }
 
 $(document).ready(function () {
+        
     // Initialize the Bootstrap Tooltip API
     $(function () {
         $('[data-toggle="tooltip"]').tooltip();
@@ -63,7 +64,7 @@ $(document).ready(function () {
                         last_name: $('#editForm #last_name').val(),
                         mobile: $('#editForm #mobile').val(),
                         email: $('#editForm #email').val(),
-                        language_id: $('#editForm #language_id').val(),
+                        language_id: $('#editForm #language').val(),
                         dob: $('#editForm #dob').val()
                     },
                     dataType: 'json',
@@ -91,6 +92,7 @@ $(document).ready(function () {
                     },
                     error: function () {
                         // TODO: Create error state
+                        console.log('Edit Error');
                     }
                 })                
             }
@@ -130,6 +132,7 @@ $(document).ready(function () {
                 },
                 error: function () {
                     // TODO: Create error state
+                    console.log('Delete Person Error');
                 }
             })   
         } else {
@@ -141,7 +144,36 @@ $(document).ready(function () {
     $('.close-modal').on('click', function () {
         // When the modal is closed, reset the form
         $('#addPerson input, #addPerson select').val('');
-        $('#addPerson').reset();
+        document.getElementById("addPersonForm").reset();
+    })
+    
+    $('#addPersonForm').validate({
+        submitHandler: function (form) {
+            
+            $.ajax({
+                url: '/index.php/people/',
+                data: {
+                    first_name: $('#addPersonForm #first_name').val(),
+                    last_name: $('#addPersonForm #last_name').val(),
+                    mobile: $('#addPersonForm #mobile').val(),
+                    email: $('#addPersonForm #email').val(),
+                    language_id: $('#addPersonForm #language').val(),
+                    dob: $('#addPersonForm #dob').val()
+                },
+                type: 'post',
+                dataType: 'json',
+                success: function (response) {
+                    console.log('ok');
+                    $('#createModal').modal('hide');
+                    document.getElementById("addPersonForm").reset();
+                    location.reload();
+                }, 
+                error: function () {
+                    console.log('Add Person Error');
+                }
+            })
+            
+        }
     })
     
 });
@@ -159,16 +191,17 @@ function cancelEdit(container, data) {
     // otherwise replace existing data with new data
     if(typeof data == 'undefined') {
         $(container).find('input').each(function (index, value) {
-        
             var val = $(value).data('current');
-
             $(value).parent().html(val);
-
         });
     } else {
         $(container).find('input').each(function (index, value) {
             var val = data[$(value).attr('id')];
-            
+            $(value).parent().html(val);
+        });
+        
+        $(container).find('select').each(function (index, value) {
+            var val = data[$(value).attr('id')];
             $(value).parent().html(val);
         });
     }
@@ -204,9 +237,20 @@ function createInputs(container) {
 function generateSelectField(target) {
     
     var id = $(target).data('field'),
-        value = $(target).html();
+        value = $(target).html(),
+        languageDropdown = $('#addPersonForm').find('#language').clone();
+
+    $(languageDropdown).find('option').each(function () {
+        // Look for the selected field
+        if($(this).html() == value) {
+            $(this).attr('selected', 'selected');
+        }
+    });
     
+    // place the entire div in the space
+    fieldHtml = languageDropdown[0].outerHTML;
     
+    $(target).html(fieldHtml);
     
 }
 

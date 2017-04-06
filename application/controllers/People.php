@@ -33,6 +33,7 @@ class People extends CI_Controller {
                 $this->_put();
                 break;
             case 'post':
+                $this->_post();
                 break;
             case 'delete':
                 $this->_put();
@@ -60,6 +61,19 @@ class People extends CI_Controller {
         }
     }
     
+    private function _post() {
+        
+        $this->load->helper('mobile');
+        
+        $vars = get_vars();
+        
+        $vars->mobile = human_to_db($vars->mobile);
+        
+        $person = $this->people_model->upsert($vars);
+        
+        return_json(array('message' => 'Person has been created', 'data' => $person), 200);        
+    }
+    
     private function _put() {
         // Load a mobile helper to assist with converting the mobile number
         $this->load->helper('mobile');
@@ -77,8 +91,7 @@ class People extends CI_Controller {
             }
             
             // Update user
-            $person = $this->people_model->upsert($vars->id, $vars);
-            
+            $person = $this->people_model->upsert($vars, $vars->id);
             return_json(array('message' => 'Person has been updated', 'data' => $person), 200);
             
         } else {

@@ -48,8 +48,10 @@ class People_model extends CI_Model {
      */
     public function get_person($id) {
         
-        $result = $this->db->where('id', $id)
+        $result = $this->db->select('people.id AS id, first_name, last_name, mobile, email, language_id, languages.name AS language, dob, date_modified, modified_by, people.date_created AS date_created')
+                           ->where('people.id', $id)
                            ->where('deleted', 0)
+                           ->join('languages', 'people.language_id = languages.id', 'left')
                            ->limit(1)
                            ->get('people');
         
@@ -70,7 +72,7 @@ class People_model extends CI_Model {
      * @param object $data
      * @return object
      */
-    public function upsert($id, $data) {
+    public function upsert($data, $id = 0) {
         
         if($this->get_person($id)) {
             
@@ -78,7 +80,15 @@ class People_model extends CI_Model {
             
         } else {
             // Create a new person
+            return $this->add_person($data);
         }
+    }
+    
+    private function add_person($data) {
+        
+        $this->db->insert('people', $data);
+        
+        return $this->get_person($this->db->insert_id());
         
     }
     
