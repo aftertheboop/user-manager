@@ -120,10 +120,17 @@ class People extends CI_Controller {
         $vars->modified_by = $this->tank_auth->get_user_id();
         $vars->date_modified = date('Y-m-d H:i:s');
         $vars->date_created = date('Y-m-d H:i:s');
-        // Upsert the person
-        $person = $this->people_model->upsert($vars);
-        // Return a JSON object
-        return_json(array('message' => 'Person has been created', 'data' => $person), 200);        
+        
+        $errors = $this->_validate($vars);
+        
+        if(empty($errors)) {
+            // Upsert the person
+            $person = $this->people_model->upsert($vars);
+            // Return a JSON object
+            return_json(array('message' => 'Person has been created', 'data' => $person), 200);        
+        } else {
+            return_json(array('message' => 'Person could not be created', 'errors' => $errors), 403);
+        }
     }
     
     /**
@@ -147,15 +154,68 @@ class People extends CI_Controller {
                 $vars->mobile = human_to_db($vars->mobile);
             }
             
+            $errors = $this->_validate();
+            
             // Update user by their ID
+            if(empty($errors)) {
             $person = $this->people_model->upsert($vars, $vars->id);
             // Return user data
             return_json(array('message' => 'Person has been updated', 'data' => $person), 200);
+            } else {
+                return_json(array('message' => 'Person could not be updated', 'errors' => $errors), 403);
+            }
             
         } else {
             // Fail. No ID set to update
             return_json(array('message' => 'Person could not be updated'), 403);
         }
+        
+    }
+    
+    /**
+     * Validate
+     * 
+     * Server-side validation
+     */
+    private function _validate() {
+        
+        $vars = get_vars();
+        $errors = array();
+        
+        if(get_request_type() != 'delete') {
+        
+            // First Name
+            if(!isset($vars->first_name) || strlen($vars->first_name) < 1) {
+                $errors['first_name'] = 'Please enter your first name'; 
+            }
+
+            // Last Name
+            if(!isset($vars->last_name) || strlen($vars->last_name) < 1) {
+                $errors['last_name'] = 'Please enter your last name'; 
+            }
+
+            // Email address
+            if(!isset($vars->email) || strlen($vars->email) < 1) {
+                $errors['email'] = 'Please enter your email address';
+            }
+            if (filter_var($vars->email, FILTER_VALIDATE_EMAIL) === false) {
+                $errors['email'] = 'Please enter a valid email address';
+            }
+
+            // Phone number
+            $this->load->helper('mobile');
+            $vars->mobile = human_to_db($vars->mobile);
+            if(strlen($vars->mobile) != 11 || !is_numeric($vars->mobile)) {
+                $errors['mobile'] = 'Please enter a valid mobile number';
+            }
+
+            // DOB
+            if (!preg_match("/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/",$vars->dob)) {
+                $errors['dob'] = 'Please enter your date of birth in the format required';
+            }
+        }
+        
+        return $errors;
         
     }
     

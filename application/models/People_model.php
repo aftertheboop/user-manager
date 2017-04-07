@@ -29,6 +29,7 @@ class People_model extends CI_Model {
                            ->limit($limit, $offset)
                            ->join('languages', 'people.language_id = languages.id', 'left')
                            ->where('deleted', 0)
+                           ->order_by('date_modified', 'desc')
                            ->get('people');
         
         if($result->num_rows() > 0) {
