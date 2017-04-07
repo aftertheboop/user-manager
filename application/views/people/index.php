@@ -1,5 +1,5 @@
 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-    <h1>People Manager</h1>
+    <h1>People Manager</h1> <a href="/auth/logout" class="btn btn-default pull-right input-sm">Log out</a>
     
     <button id="addPerson" class="btn btn-success" data-toggle="modal" data-target="#createModal"><span class="glyphicon glyphicon-plus"></span> Add Person</button>
 
@@ -17,11 +17,20 @@
             </tr>
         </thead>
         <tbody>
-            <?php foreach($people as $person) {
-                
-                $this->load->view('people/person', array('data' => $person));
-                
-            } ?>
+            
+            <?php 
+            
+            
+            if($people) {
+                foreach($people as $person) {
+
+                    $this->load->view('people/person', array('data' => $person));
+
+                } 
+            } else {
+                echo '<tr><td colspan="8" class="text-center">Table is empty</td></tr>';
+            }
+?>
         </tbody>
     </table>
     
@@ -65,6 +74,7 @@
                     </div>
             </div>
             <div class="modal-footer">
+                <img src="/img/ajax-loader.gif" class="addLoading" />
               <button type="button" class="btn btn-default close-modal" data-dismiss="modal">Close</button>
               <input type="submit" class="btn btn-success" value="Save Person" />
             </div>

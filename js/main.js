@@ -141,14 +141,19 @@ $(document).ready(function () {
         }
     });
     
-    $('.close-modal').on('click', function () {
+    $('.close-modal, .close').on('click', function () {
         // When the modal is closed, reset the form
         $('#addPerson input, #addPerson select').val('');
         document.getElementById("addPersonForm").reset();
-    })
+        var validator = $( "#addPersonForm" ).validate();
+        validator.resetForm();
+    });
     
     $('#addPersonForm').validate({
         submitHandler: function (form) {
+            
+            $('#addPersonForm .modal-footer .btn').attr('disabled', 'disabled');
+            $('.addLoading').css('visibility', 'visible');
             
             $.ajax({
                 url: '/index.php/people/',
@@ -163,13 +168,17 @@ $(document).ready(function () {
                 type: 'post',
                 dataType: 'json',
                 success: function (response) {
-                    console.log('ok');
+                    
+                    $('#addPersonForm .modal-footer .btn').removeAttr('disabled');
                     $('#createModal').modal('hide');
+                    $('.addLoading').css('visibility', 'hidden');
                     document.getElementById("addPersonForm").reset();
+                    
                     location.reload();
                 }, 
                 error: function () {
-                    console.log('Add Person Error');
+                    $('.addLoading').css('visibility', 'hidden');
+                    $('#addPersonForm .modal-footer .btn').removeAttr('disabled');
                 }
             })
             
@@ -209,6 +218,8 @@ function cancelEdit(container, data) {
     $(container).find('.edit').show();
     $(container).find('.save').hide();
     $(container).find('.cancel').hide();
+    var validator = $( "#editForm" ).validate();
+        validator.resetForm();
 }
 
 function createInputs(container) {

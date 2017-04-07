@@ -13,9 +13,15 @@ class People extends CI_Controller {
         parent::__construct();
         
         // Load in general use libraries, models and helpers
+        $this->load->library('tank_auth');
         $this->load->model('people_model');
         $this->load->helper('restful');
+        $this->load->helper('url');
         
+        // Auth 
+        if(!$this->tank_auth->is_logged_in()) {
+            redirect('auth/login');
+        }
     }
     
     public function index($page = 1) {
