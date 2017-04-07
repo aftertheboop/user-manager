@@ -10,11 +10,11 @@ The portal uses the Tank Auth library by Ilya Konyukhov (https://konyukhov.com/s
 
 ## Set up instructions
 
-*Unzip the folder to a directory 
-*Create a virtual host for usermanager.local pointing to the root directory
-*Create a database and run user_manager.sql to create the database
-*Configure the database connection in /application/config/database.php
-*Navigate to the root directory in your browser
-*Log in with the username "admin" and password "admin12"
+* Unzip the folder to a directory 
+* Create a virtual host for usermanager.local pointing to the root directory
+* Create a database and run user_manager.sql to create the database
+* Configure the database connection in /application/config/database.php
+* Navigate to the root directory in your browser
+* Log in with the username "admin" and password "admin12"
 
 
