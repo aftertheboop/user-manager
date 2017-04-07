@@ -1,6 +1,5 @@
 if(typeof $ === 'undefined') {
     $ = {};
-    
 }
 
 $(document).ready(function () {
@@ -17,13 +16,12 @@ $(document).ready(function () {
            container = $(this).parent().parent();
            $(container).parent().parent().wrap('<form id="editForm"></div>');
           
-           
+        // Change up the display of inputs
         $(container).find('.edit').hide();
         $(container).find('.save').show();
         $(container).find('.cancel').show();
-           
-        current = createInputs(container);
-        
+        // Turn the data display into inputs
+        current = createInputs(container);        
         $(container).find('input').first().focus();
         
         return false;
@@ -31,10 +29,10 @@ $(document).ready(function () {
     });
     
     $('.cancel').on('click', function () {
-        
+        // Cancel the edit. Return all data back to how it was
         var id = $(this).data('id'),
             container = $(this).parent().parent();
-        
+        // Confirm box
         var r = confirm("Are you sure you want to cancel your edit? Changes will not be saved.");
         if (r === true) {
             cancelEdit(container);
@@ -42,7 +40,7 @@ $(document).ready(function () {
             return false;
         }
         
-    })
+    });
     
     $('.save').on('click', function () {
         
@@ -55,7 +53,7 @@ $(document).ready(function () {
                 // loader
                 $('.save, .cancel').attr('disabled', 'disabled');
                 $('.loading').css('visibility', 'visible');
-                
+                // Perform Ajax PUT on successful validation
                 $.ajax({
                     url: '/index.php/people/',
                     data: {
@@ -91,8 +89,8 @@ $(document).ready(function () {
                         
                     },
                     error: function () {
-                        // TODO: Create error state
-                        console.log('Edit Error');
+                        
+                        alert('There was an error editing this person!');
                     }
                 })                
             }
@@ -105,12 +103,12 @@ $(document).ready(function () {
             
         // Highlight the affected row
         $(container).addClass('danger').delay(50);
-            
+        // Confirm box
         var r = confirm("Are you sure you want to delete this user?");
         if (r === true) {
             $('.delete').attr('disabled', 'disabled');
             $('.loading').css('visibility', 'visible');
-
+            // On confirm "yes", perform AJAX request
             $.ajax({
                 url: '/index.php/people/',
                 data: {
@@ -124,7 +122,7 @@ $(document).ready(function () {
                     // is hidden
                     $('.delete').removeAttr('disabled');
                     $('.loading').css('visibility', 'hidden');
-                    
+                    // Remove the user's row from the table
                     $(container).fadeOut(function () {
                        $(this).remove(); 
                     });
@@ -132,7 +130,8 @@ $(document).ready(function () {
                 },
                 error: function () {
                     // TODO: Create error state
-                    console.log('Delete Person Error');
+                    //console.log('Delete Person Error');
+                    alert('This person could not be deleted');
                 }
             })   
         } else {
@@ -145,6 +144,7 @@ $(document).ready(function () {
         // When the modal is closed, reset the form
         $('#addPerson input, #addPerson select').val('');
         document.getElementById("addPersonForm").reset();
+        // Reset the form validation
         var validator = $( "#addPersonForm" ).validate();
         validator.resetForm();
     });
@@ -177,6 +177,7 @@ $(document).ready(function () {
                     location.reload();
                 }, 
                 error: function () {
+                    alert('There was an error adding this person to the database. Please try again.')
                     $('.addLoading').css('visibility', 'hidden');
                     $('#addPersonForm .modal-footer .btn').removeAttr('disabled');
                 }
@@ -303,7 +304,4 @@ function generateTextField(target) {
     fieldHtml = '<input type="text" data-current="' + value + '" class="form-control" name="' + id + '" id="' + id + '" value="' + $(target).html() + '"' + size + ' required   />';
     
     $(target).html(fieldHtml);
-    
-    return {input: id, value: value}
-    
 }

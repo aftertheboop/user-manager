@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Languages Model
+ * 
+ * Handles all database interactions for Languages
+ */
 class Languages_model extends CI_Model {
     
     public function __construct() {
@@ -8,6 +13,11 @@ class Languages_model extends CI_Model {
         
     }
     
+    /**
+     * Get Languages
+     * 
+     * @return object
+     */
     public function get_languages() {
         
         $result = $this->db->where('visible', 1)

@@ -33,6 +33,11 @@
 ?>
         </tbody>
     </table>
+    <nav aria-label="Page navigation">
+        <ul class="pagination">
+    <?php echo $this->pagination->create_links(); ?>
+        </ul>
+    </nav>
     
     <div class="modal fade" id="createModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
@@ -57,7 +62,7 @@
                     </div>
                     <div class="form-group">
                         <label for="email">Email</label>
-                        <input type="email" name="email" id="email" class="form-control" value="" required />
+                        <input type="email" name="email" id="email" class="form-control" value="" required placeholder="you@example.com" />
                     </div>
                     <div class="form-group">
                         <label for="language">Language</label>
@@ -70,7 +75,7 @@
                     </div>
                     <div class="form-group">
                         <label for="dob">Date of Birth</label>
-                        <input type="text" name="dob" id="dob" class="form-control" value="" required />
+                        <input type="text" name="dob" id="dob" class="form-control" value="" required placeholder="YYYY-MM-DD" />
                     </div>
             </div>
             <div class="modal-footer">
